@@ -1,15 +1,42 @@
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZGzIYm5hfmE0YfzDStsVCgPmp8BUZBjDCSbRS0uooHmbk_nhfzC6hloKAu2efaERx/exec'; // Cole a URL do seu deploy aqui
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5Q23tPkJ36Kdv-iYrnajV03LN3fQfJZzX84p-SF_NNRi4PEp5lg4FO6KRhfSQ3o5v/exec';
 
 const numeroInput = document.getElementById('numero_rifa');
 const numeroStatus = document.getElementById('numero-status');
 const form = document.getElementById('cadastro-form');
 const statusMessage = document.getElementById('status-message');
 const submitButton = document.getElementById('submit-btn');
+const telefoneInput = document.getElementById('telefone');
+const clearButton = document.getElementById('clear-btn');
 
 const TOTAL_NUMEROS = 400;
 let numerosUsados = [];
 
-// 1. FUNÇÃO DE CARREGAMENTO (agora especifica a ação de leitura)
+clearButton.addEventListener('click', () => {
+    form.reset(); // Reseta todos os campos do formulário
+    numeroStatus.textContent = ''; // Limpa o status do número
+    statusMessage.textContent = ''; // Limpa a mensagem principal
+    statusMessage.className = '';
+    submitButton.disabled = true; // Desabilita o botão de cadastrar
+    document.getElementById('nome').focus(); // Foca no primeiro campo (Nome)
+});
+
+
+function aplicarMascaraTelefone(event) {
+    let valor = event.target.value.replace(/\D/g, '').substring(0, 11);
+    if (valor.length > 10) {
+        valor = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else if (valor.length > 5) {
+        valor = valor.replace(/(\d{2})(\d{4,5})/, '($1) $2-');
+    } else if (valor.length > 2) {
+        valor = valor.replace(/(\d{2})(\d+)/, '($1) $2');
+    } else if (valor.length > 0) {
+        valor = valor.replace(/(\d{1,2})/, '($1');
+    }
+    event.target.value = valor;
+}
+
+telefoneInput.addEventListener('input', aplicarMascaraTelefone);
+
 async function carregarNumerosUsados() {
     statusMessage.textContent = 'Verificando números...';
     try {
@@ -25,7 +52,6 @@ async function carregarNumerosUsados() {
     }
 }
 
-// 2. LÓGICA DE VERIFICAÇÃO EM TEMPO REAL (sem alterações)
 numeroInput.addEventListener('input', () => {
     const numero = parseInt(numeroInput.value, 10);
     statusMessage.className = '';
@@ -49,18 +75,16 @@ numeroInput.addEventListener('input', () => {
     }
 });
 
-// 3. LÓGICA DE SUBMISSÃO (agora usando GET com parâmetros na URL)
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     submitButton.disabled = true;
     statusMessage.className = '';
     statusMessage.textContent = 'Enviando...';
 
-    // Monta a URL com todos os dados do formulário
     const params = new URLSearchParams({
         action: 'write',
         nome: document.getElementById('nome').value,
-        telefone: document.getElementById('telefone').value,
+        telefone: telefoneInput.value.replace(/\D/g, ''),
         email: document.getElementById('email').value,
         data_nascimento: document.getElementById('data_nascimento').value,
         numero_rifa: numeroInput.value
@@ -68,16 +92,39 @@ form.addEventListener('submit', async (e) => {
     const urlWrite = `${APPSCRIPT_URL}?${params.toString()}`;
 
     try {
-        // A requisição agora é um simples GET
         const response = await fetch(urlWrite);
         const result = await response.json();
         
         if (result.status === 'success') {
             statusMessage.className = 'status-success';
             statusMessage.textContent = 'Cadastro realizado com sucesso!';
-            form.reset();
+            
+            // =====================================================================
+            // --- INÍCIO DA NOVA LÓGICA DE RESET INTELIGENTE ---
+            // =====================================================================
+
+            // 1. Limpa apenas o campo do número da rifa
+            numeroInput.value = '';
+
+            // 2. Limpa a mensagem de status do número (✅/❌)
             numeroStatus.textContent = '';
+
+            // 3. Coloca o foco de volta no campo do número para o próximo cadastro
+            numeroInput.focus();
+            
+            // 4. Bônus: Mantém a mensagem de sucesso por alguns segundos e depois avisa que está pronto
+            setTimeout(() => {
+                statusMessage.textContent = 'Pronto para o próximo número...';
+                statusMessage.className = '';
+            }, 2500); // 2.5 segundos
+
+            // 5. Recarrega a lista de números atualizada em segundo plano
             await carregarNumerosUsados();
+            
+            // =====================================================================
+            // --- FIM DA NOVA LÓGICA ---
+            // =====================================================================
+
         } else {
             throw new Error(result.message);
         }
@@ -89,7 +136,6 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
-// CARREGAMENTO INICIAL
 document.addEventListener('DOMContentLoaded', () => {
     submitButton.disabled = true;
     carregarNumerosUsados();
