@@ -1,68 +1,85 @@
-// Cole a NOVA URL do seu deploy aqui
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3hTr6WnC0m-iY76zf96_BU_KlEK-yu3GDw8URq8YQHHw2EBdHcrroLVrpb-tqlPMw/exec';
+// Este "embrulho" garante que o código só rode depois que todo o HTML for carregado.
+document.addEventListener('DOMContentLoaded', () => {
 
-// --- Elementos do DOM ---
-const modal = document.getElementById('modal-consulta');
-const btnAbrirModal = document.querySelector('.btn-consultar');
-const btnFecharModal = document.getElementById('modal-close-btn');
-const formConsulta = document.getElementById('form-consulta');
-const resultadoDiv = document.getElementById('resultado-consulta');
-const btnBuscar = document.getElementById('btn-buscar');
+    // Cole a URL do seu deploy aqui
+    const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3hTr6WnC0m-iY76zf96_BU_KlEK-yu3GDw8URq8YQHHw2EBdHcrroLVrpb-tqlPMw/exec';
 
-// --- Funções para controlar o Modal ---
-function abrirModal(e) {
-    e.preventDefault(); // Impede o link de navegar
-    modal.style.display = 'flex';
-}
+    // --- Elementos do DOM ---
+    const modal = document.getElementById('modal-consulta');
+    const btnAbrirModal = document.querySelector('.btn-consultar');
+    const btnFecharModal = document.getElementById('modal-close-btn');
+    const formConsulta = document.getElementById('form-consulta');
+    const resultadoDiv = document.getElementById('resultado-consulta');
+    const btnBuscar = document.getElementById('btn-buscar');
 
-function fecharModal() {
-    modal.style.display = 'none';
-}
-
-// --- Event Listeners ---
-btnAbrirModal.addEventListener('click', abrirModal);
-btnFecharModal.addEventListener('click', fecharModal);
-// Fecha o modal se clicar fora da caixa de conteúdo
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        fecharModal();
+    // --- Funções para controlar o Modal ---
+    function abrirModal(e) {
+        e.preventDefault(); // Impede o link de navegar
+        modal.style.display = 'flex';
     }
-});
 
-// --- Lógica da Consulta ---
-formConsulta.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    function fecharModal() {
+        modal.style.display = 'none';
+        // Limpa o resultado ao fechar
+        resultadoDiv.innerHTML = '';
+        formConsulta.reset();
+    }
+
+    // --- Event Listeners ---
+    // Verifica se o botão existe antes de adicionar o listener
+    if (btnAbrirModal) {
+        btnAbrirModal.addEventListener('click', abrirModal);
+    }
     
-    const email = document.getElementById('consulta-email').value;
-    const dataNasc = document.getElementById('consulta-nascimento').value;
+    if (btnFecharModal) {
+        btnFecharModal.addEventListener('click', fecharModal);
+    }
 
-    btnBuscar.textContent = 'Buscando...';
-    btnBuscar.disabled = true;
-    resultadoDiv.innerHTML = '';
+    // Fecha o modal se clicar fora da caixa de conteúdo
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                fecharModal();
+            }
+        });
+    }
 
-    // Monta a URL de consulta
-    const params = new URLSearchParams({
-        action: 'consult',
-        email: email,
-        data_nascimento: dataNasc
-    });
-    const urlConsulta = `${APPSCRIPT_URL}?${params.toString()}`;
+    // --- Lógica da Consulta ---
+    if (formConsulta) {
+        formConsulta.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('consulta-email').value;
+            const dataNasc = document.getElementById('consulta-nascimento').value;
 
-    try {
-        const response = await fetch(urlConsulta);
-        const numeros = await response.json();
+            btnBuscar.textContent = 'Buscando...';
+            btnBuscar.disabled = true;
+            resultadoDiv.innerHTML = '';
 
-        if (numeros.length > 0) {
-            resultadoDiv.innerHTML = `<p>Seus números da sorte são:</p><h3>${numeros.join(', ')}</h3>`;
-        } else {
-            resultadoDiv.innerHTML = `<p>Nenhum número encontrado para os dados informados. Verifique se digitou tudo corretamente.</p>`;
-        }
+            const params = new URLSearchParams({
+                action: 'consult',
+                email: email,
+                data_nascimento: dataNasc
+            });
+            const urlConsulta = `${APPSCRIPT_URL}?${params.toString()}`;
 
-    } catch (error) {
-        resultadoDiv.innerHTML = `<p style="color: red;">Ocorreu um erro ao buscar. Tente novamente.</p>`;
-        console.error('Erro na consulta:', error);
-    } finally {
-        btnBuscar.textContent = 'Buscar';
-        btnBuscar.disabled = false;
+            try {
+                const response = await fetch(urlConsulta);
+                const numeros = await response.json();
+
+                if (numeros.length > 0) {
+                    resultadoDiv.innerHTML = `<p>Seus números da sorte são:</p><h3>${numeros.join(', ')}</h3>`;
+                } else {
+                    resultadoDiv.innerHTML = `<p>Nenhum número encontrado para os dados informados. Verifique se digitou tudo corretamente.</p>`;
+                }
+
+            } catch (error) {
+                resultadoDiv.innerHTML = `<p style="color: red;">Ocorreu um erro ao buscar. Tente novamente.</p>`;
+                console.error('Erro na consulta:', error);
+            } finally {
+                btnBuscar.textContent = 'Buscar';
+                btnBuscar.disabled = false;
+            }
+        });
     }
 });
