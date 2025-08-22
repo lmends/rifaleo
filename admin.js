@@ -1,4 +1,4 @@
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHurBYCl0Kg3hAM351ILX5YYzIleA4_2MYkq_oJUr1Gnz5LGdbZClkZUTOGSRM7DrB/exec';
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJYdyw5uRaVrtRxBzoZGSCr1TkqvVIphz42y101ASc4Zq46ums7Gm0pyECt8RHq7DY/exec';
 
 const numeroInput = document.getElementById('numero_rifa');
 const numeroStatus = document.getElementById('numero-status');

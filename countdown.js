@@ -2,7 +2,7 @@
 // Formato: Ano, Mês (0-11), Dia, Hora, Minuto, Segundo
 // Setembro é o mês 8, pois a contagem começa do 0 (Janeiro).
 
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHurBYCl0Kg3hAM351ILX5YYzIleA4_2MYkq_oJUr1Gnz5LGdbZClkZUTOGSRM7DrB/exec';
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJYdyw5uRaVrtRxBzoZGSCr1TkqvVIphz42y101ASc4Zq46ums7Gm0pyECt8RHq7DY/exec';
 
 
 const dataSorteio = new Date(2025, 8, 30, 20, 0, 0);
