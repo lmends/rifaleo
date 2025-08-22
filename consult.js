@@ -1,5 +1,5 @@
 // Cole a NOVA URL do seu deploy aqui
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5Q23tPkJ36Kdv-iYrnajV03LN3fQfJZzX84p-SF_NNRi4PEp5lg4FO6KRhfSQ3o5v/exec';
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3hTr6WnC0m-iY76zf96_BU_KlEK-yu3GDw8URq8YQHHw2EBdHcrroLVrpb-tqlPMw/exec';
 
 // --- Elementos do DOM ---
 const modal = document.getElementById('modal-consulta');

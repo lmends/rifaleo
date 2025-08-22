@@ -1,6 +1,10 @@
 // --- Defina a data e hora do sorteio ---
 // Formato: Ano, Mês (0-11), Dia, Hora, Minuto, Segundo
 // Setembro é o mês 8, pois a contagem começa do 0 (Janeiro).
+
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3hTr6WnC0m-iY76zf96_BU_KlEK-yu3GDw8URq8YQHHw2EBdHcrroLVrpb-tqlPMw/exec';
+
+
 const dataSorteio = new Date(2025, 8, 30, 20, 0, 0);
 
 // --- Seleciona os elementos no HTML ---
@@ -10,6 +14,30 @@ const minutosEl = document.getElementById('minutes');
 const segundosEl = document.getElementById('seconds');
 const timerEl = document.getElementById('timer');
 const h1El = document.querySelector('h1');
+
+// --- Elementos do DOM (Barra de Progresso) ---
+const progressBar = document.getElementById('progress-bar');
+const progressText = document.getElementById('progress-text');
+
+
+async function atualizarBarraDeProgresso() {
+    try {
+        const urlProgress = `${APPSCRIPT_URL}?action=getProgress`;
+        const response = await fetch(urlProgress);
+        const data = await response.json();
+
+        if (data.total > 0) {
+            const porcentagem = (data.vendidos / data.total) * 100;
+            progressBar.style.width = `${porcentagem.toFixed(2)}%`;
+            progressText.textContent = `${Math.round(porcentagem)}% dos números vendidos!`;
+        }
+
+    } catch (error) {
+        progressText.textContent = "Erro ao carregar progresso.";
+        console.error("Erro ao buscar progresso:", error);
+    }
+}
+
 
 function atualizarContagem() {
     const agora = new Date();
@@ -41,3 +69,9 @@ const intervalo = setInterval(atualizarContagem, 1000);
 
 // Chama a função uma vez no início para não esperar 1 segundo
 atualizarContagem();
+
+// --- CHAMADA INICIAL ---
+// Chama as funções para carregar tudo assim que a página abre
+document.addEventListener('DOMContentLoaded', () => {
+    atualizarBarraDeProgresso();
+});
